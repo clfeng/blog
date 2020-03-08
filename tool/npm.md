@@ -14,4 +14,4 @@
 1. node_modules的寻址方式
 本地node_modules 
 
-
+## 如何开发维护一个npm包
