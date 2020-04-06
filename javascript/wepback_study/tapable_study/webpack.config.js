@@ -29,6 +29,6 @@ module.exports = {
         hot: true,
         open: true,
         openPage: 'index.html',
-        port: 9000
+        port: 9001
     }
 }

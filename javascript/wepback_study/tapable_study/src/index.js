@@ -3,9 +3,9 @@ import TapableDemo from './TapableDemo.js';
 
 const tapableDemo = new TapableDemo();
 
-// tapableDemo.hooks.syncHook.tap('syncHookPlugin', () => {
-//     console.log('syncHookPlugin');
-// });
+tapableDemo.hooks.syncHook.tap('syncHookPlugin', () => {
+    console.log('syncHookPlugin');
+});
 
 // tapableDemo.callSyncHook();
 
@@ -105,28 +105,6 @@ const tapableDemo = new TapableDemo();
 // tapableDemo.callAsyncParallelBailHook((result) => { console.log('asyncParallelBailHook result', result); });
 
 
-// tapableDemo.hooks.asyncSeriesHook.tapPromise('asyncSeriesHookPlugin1', () => {
-//     return new Promise((resolve, reject) => {
-//         setTimeout(() => {
-//             console.log('asyncSeriesHookPlugin1', new Date());
-//             resolve();
-//         }, 1000);
-//     });
-// });
-
-// tapableDemo.hooks.asyncSeriesHook.tapPromise('asyncSeriesHookPlugin2', () => {
-//     return new Promise((resolve, reject) => {
-//         setTimeout(() => {
-//             console.log('asyncSeriesHookPlugin2', new Date());
-//             resolve();
-//         }, 2000);
-//     });
-// });
-
-// console.log('start', new Date());
-// tapableDemo.callAsyncSeriesHook().then(() => { console.log('asyncSeriesHookPlugin end', new Date()); });
-
-
 // tapableDemo.hooks.asyncSeriesBailHook.tapPromise('asyncSeriesBailHookPlugin1', () => {
 //     return new Promise((resolve, reject) => {
 //         setTimeout(() => {
@@ -147,23 +125,80 @@ const tapableDemo = new TapableDemo();
 
 // tapableDemo.callAsyncSeriesBailHook().then(() => { console.log('asyncSeriesBailHookPlugin end'); });
 
-tapableDemo.hooks.asyncSeriesWaterfallHook.tapPromise('asyncSeriesWaterfallHookPlugin1', (result) => {
+// tapableDemo.hooks.asyncSeriesWaterfallHook.intercept({
+//     call: (...args) => {
+//         console.log(...args, 'intercept call');
+//     },
+//     register: (tap) => {
+//         console.log(tap, 'intercept register');
+//         return tap;
+//     },
+//     loop: (...args) => {
+//         console.log(...args, 'intercept loop')
+//     },
+//     tap: (tap) => {
+//         console.log(tap, 'intercept tap')
+//     }
+// });
+// tapableDemo.hooks.asyncSeriesWaterfallHook.tapPromise('asyncSeriesWaterfallHookPlugin1', (result) => {
+//     return new Promise((resolve, reject) => {
+//         setTimeout(() => {
+//             console.log('asyncSeriesWaterfallHookPlugin1', result);
+
+//             resolve(1);
+//         }, 1000);
+//     });
+// });
+
+// tapableDemo.hooks.asyncSeriesWaterfallHook.tapPromise('asyncSeriesWaterfallHookPlugin2', (result) => {
+//     return new Promise((resolve, reject) => {
+//         setTimeout(() => {
+//             console.log('asyncSeriesWaterfallHookPlugin2', result);
+//             resolve(2);
+//         }, 2000);
+//     });
+// });
+
+// tapableDemo.callAsyncSeriesWaterfallHook().then((result) => { console.log('asyncSeriesWaterfallHookPlugin2 end, and result', result); });
+
+tapableDemo.hooks.asyncSeriesHook.intercept({
+	context: true, // 这里配置启用上下文对象
+	tap: (context, tapInfo) => {
+		if (context) { // 这里就可以拿到上下文对象
+			context.hasContext = true;
+		}
+	}
+});
+
+tapableDemo.hooks.asyncSeriesHook.tap({
+	name: "asyncSeriesHookContext",
+	context: true
+}, (context, newSpeed) => {
+    // 这里可以拿到拦截器里的上下文对象，然后我们在插件里利用它的值做相应操作。
+	if (context && context.hasContext) {
+		console.log("hello, this is context...");
+	} else {
+		console.log("no context");
+	}
+});
+
+tapableDemo.hooks.asyncSeriesHook.tapPromise('asyncSeriesHookPlugin1', (context) => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            console.log('asyncSeriesWaterfallHookPlugin1', result);
-
-            resolve(1);
+            console.log('asyncSeriesHookPlugin1', new Date());
+            resolve();
         }, 1000);
     });
 });
 
-tapableDemo.hooks.asyncSeriesWaterfallHook.tapPromise('asyncSeriesWaterfallHookPlugin2', (result) => {
+tapableDemo.hooks.asyncSeriesHook.tapPromise('asyncSeriesHookPlugin2', () => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
-            console.log('asyncSeriesWaterfallHookPlugin2', result);
-            resolve(2);
+            console.log('asyncSeriesHookPlugin2', new Date());
+            resolve();
         }, 2000);
     });
 });
 
-tapableDemo.callAsyncSeriesWaterfallHook().then((result) => { console.log('asyncSeriesWaterfallHookPlugin2 end, and result', result); });
+console.log('start', new Date());
+tapableDemo.callAsyncSeriesHook().then(() => { console.log('asyncSeriesHookPlugin end', new Date()); });
