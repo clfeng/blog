@@ -1,5 +1,6 @@
 # git 学习
 1. 学习资料 [pro git](https://git-scm.com/book/zh/v2)
+2. 中文资料，可以配合这熟悉一些git命令 https://www.yiibai.com/git/git_config.html
 
 在进行提交操作时，Git 会保存一个提交对象（commit object）。知道了 Git 保存数据的方式，我们可以很自
 然的想到——该提交对象会包含一个指向暂存内容快照的指针。 但不仅仅是这样，该提交对象还包含了作者的姓
