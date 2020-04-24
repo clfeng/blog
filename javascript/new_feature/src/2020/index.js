@@ -43,7 +43,13 @@ console.log(globalThis === window);
 console.log(globalThis === global);
 
 // for-in机制,ECMAScript遗留了一个关于for-in循环顺序的详细描述。感谢Kevin Gibbons所付出的努力，为for-in机制定义了一系列规则。
+// forin 的相关东西比较复杂，后续有时间再回看
 // 6. optional chaining
+// 基本的用法
+// obj?.prop       // optional static property access
+// obj?.[expr]     // optional dynamic property access
+// func?.(...args) // optional function or method call
+
 console.log('---------optional chaining---------');
 let data = {};
 // 之前
