@@ -11,6 +11,8 @@
 
 
 
+注：第二步开始编译，在 compiler.run 方法中会进行创建 compilation 对象（compilation对象代表这一次编译），到了第三步，添加入口用的也是 compilation.addEntry 进行编译入口的添加
+
 ### 细节流程
 
 初始化： 包括前面的1、2

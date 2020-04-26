@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<iframe src="frame-a.html"></iframe>
+<script>
+  const iframe = document.querySelector('iframe');
+  iframe.onload = () => {
+    // The global variable `foo` exists.
+    console.log(frames[0].foo === 'a');
+    const before = frames[0].getGlobalThis();
+    iframe.onload = () => {
+      // The global variable `foo` has disappeared.
+      console.log(frames[0].foo === undefined, 'The global object changes during navigation');
+      const after = frames[0].getGlobalThis();
+      // But, `globalThis` still has the same identity.
+
+      console.log(before === after, 'globalThis maintains its identity during navigation');
+    };
+    iframe.src = 'frame-b.html';
+  };
+</script>
+</body>
+</html>

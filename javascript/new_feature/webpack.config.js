@@ -1,7 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     mode: "development",
@@ -22,7 +22,13 @@ module.exports = {
 
     plugins: [
         new HtmlWebpackPlugin(),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        new CopyPlugin([
+            { 
+                from: path.resolve(__dirname, './static'), 
+                to: path.resolve(__dirname, 'dist') 
+            }
+          ]),
     ],
 
     devServer: {
