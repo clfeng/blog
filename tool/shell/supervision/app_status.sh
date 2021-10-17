@@ -40,7 +40,7 @@ function get_process_pid_by_name
 function get_process_info_by_pid 
 {
   pid=$1;
-  if [ $(ps -ef | awk -v pid=$pid '$2==pid{print}' | wc -l ) -eq 1 ];then
+  if [ $(ps -ef | awk -v pid="$pid" '$2==pid{print}' | wc -l ) -eq 1 ];then
     pro_status="RUNNING";
   else
     pro_status="STOPED";

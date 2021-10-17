@@ -1,19 +1,877 @@
-# shell
+# Shell
+
+## shell 与 shell 脚本
+
+**Shell**（也称为**壳层**）在[计算机科学](https://zh.wikipedia.org/wiki/電腦科學)中指“为用户提供用户界面”的软件，通常指的是[命令行界面](https://zh.wikipedia.org/wiki/命令行界面)的[解析器](https://zh.wikipedia.org/wiki/解析器)。一般来说，这个词是指[操作系统](https://zh.wikipedia.org/wiki/作業系統)中提供访问[内核](https://zh.wikipedia.org/wiki/内核)所提供之服务的程序。Shell 也用于泛指所有为用户提供操作界面的程序，也就是程序和用户[交互](https://zh.wikipedia.org/w/index.php?title=交互&action=edit&redlink=1)的层面。因此与之相对的是[内核](https://zh.wikipedia.org/wiki/内核)（英语：**Kernel**），内核不提供和用户的交互功能。
+
+**类型：**
+ - 命令行
+ - 图形界面
+
+*注：壳程序的功能只是提供用户操作系统的一个界面，因此这个壳程序需要可以调用其他软件才好。 --from 《鸟哥的 Linux 私房菜》*
+
+
+
+**什么是shell 脚本：**shell 脚本是利用 shell 的功能所写的一个【程序（program）】, 这个程序使用纯文本文件，将一些 shell 的语法与命令（含外部命令）写在里面，搭配正则表达式、管道命令与数据流重定向等功能，以达到我们所需要的处理目的。
+
+
+
+**为什么学习 shell 脚本：**
+
+- 通用：Linux 各种发行版的 shell 都相同
+- 远程管理：命令行模式就是比较快
+
+
+
+## 变量
+
+### 类别
+
+- 普通变量
+  - 全局变量
+  - 局部变量
+- 环境变量
+
+
+
+### 定义变量
+
+- 变量与变量内容以一个等号【=】来连接（*等号的两边不能有空格*）
+
+  ```shell
+  myname=clf
+  ```
+
+- 双引号的特殊字符如 $ 等，可以保有原本的特性
+
+  ```shell
+  var="lang is $LANG";
+  
+  echo $var; # lang is zh_CN.UTF-8
+  ```
+
+- 单引号内的特殊字符则仅为一般字符（纯文本）
+
+  ```shell
+  var="lang is $LANG";
+  
+  echo $var; # lang is $LANG
+  ```
+
+
+- 基于其他命令提供的信息设置变量的内容
+
+  ```shell
+  version=$(uname -r); # 更推荐该种写法
+  # version=`uname -r`
+  echo $version;
+  ```
+
+- 通常大写字符为系统默认变量，自行设置的变量可以使用小写字符（推荐习惯）
+
+- 取消变量的方法为使用 unset
+
+  ```shell
+  unset myname
+  ```
+
+- 定义局部变量
+
+  ```shell
+  #!/bin/bash
+  # 定义函数
+  function func(){
+      test=99;
+      echo "inner test: $test";
+      # 输出 inner test: 99
+  }
+  
+  # 调用函数
+  func;
+  
+  echo "outter test: $test";
+  # 输出 outter test:  99
+  
+  ```
+
+  ```shell
+  #!/bin/bash
+  # 定义函数
+  function func(){
+      local test=99; # 在函数函数内通过关键字 local 定义的局部变量只能在函数内访问
+      echo "inner test: $test";
+      # 输出 inner test: 99
+  }
+  
+  func;
+  
+  echo "outter test: $test";
+  # 输出 outter test: 
+  ```
+
+  
+
+- 定义环境变量
+
+	```shell
+  export named="clfeng";
+  declare -x named="clfeng";  
+  ```
+
+
+
+
+### 查看环境变量
+
+```shell
+env
+
+# 或者
+# export
+
+# 查看所有变量（含环境变量与自定义变量）
+# set
+```
+
+
+
+### 读取来自键盘输入的变量：
+read 关键字
+
+```shell
+read test_var;
+# 接着输入 this is a test var
+
+echo $test_var;
+# 输出 this is a test var
+
+read -p "Please keyin your name:" -t named;
+
+#tip
+# Please keyin your name:clfeng
+
+# 如果用户没有输入则使用default作为默认值
+echo ${named:-default};
+#clfeng
+
+```
+
+
+
+### 声明变量的类型：
+
+declare,typeset 关键字。这两个关键字的功能是一样，就是声明变量的类型
+
+```shell
+sum=100+300+50;
+echo $sum;
+# 输出 "100+300+50"
+
+declare -i sum=100+300+50;
+echo $sum;
+# 输出 450
+
+# 将sum变成环境变量
+declare -xi sum=100+300+50;
+export | grep sum;
+
+# 进行取消操作
+declare +x sum;
+
+
+# 让 sum 变成可读，不可修改
+declare -r sum=10;
+sum=20; # 报错
+
+```
+
+
+
+### 变量内容的删除、取代与替换
+
+#### 删除
+
+#：从前往后，符合替换文字的 【最短的】那一个
+
+##：从前往后，符合替换文字的【最长的】那一个
+
+```shell
+# 格式
+# ${variable#/replace_reg};
+# ${variable##/replace_reg};
+
+echo $PATH;
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+echo ${PATH#/*local/sbin:};
+# /usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+echo ${PATH##/*:};
+# /root/bin
+```
+
+
+
+#：从后往前，符合替换文字的 【最短的】那一个
+
+##：从后往前，符合替换文字的【最长的】那一个
+
+```shell
+# 格式
+# ${variable%/replace_reg};
+# ${variable%%/replace_reg};
+
+echo $PATH;
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+
+echo ${PATH%:*bin}
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+
+
+echo ${PATH%%:*bin}
+# /usr/local/sbin
+```
+
+
+
+#### 替换
+
+```shell
+echo $PATH
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+# 将第一个找到的 sbin 替换为 SBIN
+echo ${PATH/sbin/SBIN}
+# /usr/local/SBIN:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+# 将所有 sbin 替换为 SBIN
+echo ${PATH//sbin/SBIN}
+# /usr/local/SBIN:/usr/local/bin:/usr/SBIN:/usr/bin:/root/bin
+```
+
+
+
+#### 总结
+
+| 变量设置方式               | 说明                                                         |
+| -------------------------- | ------------------------------------------------------------ |
+| ${变量#关键字}             | 若变量内容从头开始的数据符合【关键词】，则将符合的最短数据删除 |
+| ${变量##关键字}            | 若变量内容从头开始的数据符合【关键词】，则将符合的最长数据删除 |
+| ${变量%关键字}             | 若变量内容从尾向前的数据符合【关键词】，则将符合的最短数据删除 |
+| ${变量%%关键字}            | 若变量内容从尾向前的数据符合【关键词】，则将符合的最长数据删除 |
+| ${变量/旧字符串/新字符串}  | 若变量内容符合【旧字符串】则【第一个旧字符串会被新字符串替换】 |
+| ${变量/旧字符串//新字符串} | 若变量内容符合【旧字符串】则【全部的旧字符串会被新字符串替换】 |
+|                            |                                                              |
+|                            |                                                              |
+
+### 变量的测试与内容替换
+
+| 变量设置方式     | str 没有设置           | str 为空字符串         | str 已设置为非空字符串 |
+| ---------------- | ---------------------- | ---------------------- | ---------------------- |
+| var=${str-expr}  | var=expr               | var=                   | var=$str               |
+| var=${str:-expr} | var=expr               | var=expr               | var=$str               |
+| var=${str+expr}  | var=                   | var=expr               | var=expr               |
+| var=${str:+expr} | var=                   | var=                   | var=expr               |
+| var=${str=expr}  | str=expr<br />var=expr | str不变<br />var=      | str不变<br />var=$str  |
+| var=${str:=expr} | str=expr<br />var=expr | str=expr<br />var=expr | str不变<br />var=$str  |
+| var=${str?expr}  | expr 输出至 stderr     | var                    | var=$str               |
+| var=${str:?expr} | expr 输出至 stderr     | expr 输出至 stderr     | var=$str               |
+
+
+
+```shell
+echo ${username}
+# 输出：空白行
+
+echo ${username-root}
+# 输出：root
+
+username="clfeng"
+echo ${username-root}
+# 输出：clfeng
+```
+
+
+
+```shell
+username=""
+echo ${username-root}
+# 输出 空白行
+
+# 注意以下代码 - 前带有 :
+echo ${username:-root}
+# 输出: root
+```
+
+**小结：** 比较实用的可以记住：如果变量为空或者未设置，使用默认内容可采用语法格式 `${var:-default_value}`
+
+
+
+## 变量引用小结
+
+从前面不难的示例中不难发现变量的引用有两种方式 $variable 和 ${variable}；在使用场景上，如果我们只是简单的引用一个变量那么就使用 $variable；如果还有进行一些操作，例如替换变量内容的话便使用 ${variable} 的形式吧。
+
+
+
+## 判断式
+
+### test 命令的测试功能
+
+**参数列表**
+
+![test](./test.png)
+
+
+
+```shell
+#!/bin/bash
+# filename: file_perm.sh
+# 1. 让使用者输入文件名，并且判断使用者是否真的有输入字符？
+echo -e "Please input a filename, I will check the filename's type and permission. \n\n";
+read -p "Input a filename : " filename;
+test -z $filename && echo "Your must input a filename." && exit 0;
+
+# 2. 判断文件是否存在？若不存在则显示信息并结束脚本
+test ! -e $filename && echo "The filename '${filename}' DO NOT exist" && exit 0;
+
+# 3. 开始判断文件类型与属性
+test -f $filename && filetype="regular file";
+test -f $filename && fieltype="directory";
+test -r $fiilename && perm="readable";
+test -w $filename && perm="$perm writable";
+test -x $filename && perm="$perm executable";
+
+# 4. 开始输出信息
+echo "The filename: $filename is a $filetype";
+echo "And the permissions for you are: $perm";
+```
+
+
+
+### 判断符号 []
+
+中括号的使用方法与test几乎一模一样，只是中括号比较常用在条件判断式 if...then..fi 的情况中。
+
+**注意：中括号的的左括号的右边以及右括号的左边需要有空格**
+
+```shell
+HOME="/home/clf";
+
+# 注意：中括号的两端需要有空格符来分隔。
+[ -z "$HOME" ]; echo $?;
+
+[ "$HOME" == "$MALL" ]; echo $?;
+```
+
+
+
+## 条件判断
+
+### if...then
+
+```shell
+if [ 条件判断式 ]; then
+	当条件判断式成立时，可以进行的命令工作内容
+fi
+
+# 一个条件判断，分成功执行与失败执行
+if [ 条件判断式 ]; then
+	当条件判断式成立时，可执行执行的命令
+else
+	当条件判断式不成立时，可执行执行的命令
+fi
+
+# 多个条件判断
+if [ 条件判断式一 ]; then
+	当条件判断式一成立时，可执行的命令
+elif [ 条件判断式二 ]; then
+	当条件判断式二成立时，可执行的命令
+else
+	当条件判断式一与二均不成立时，可执行的命令
+fi
+```
+
+
+
+```shell
+# 多条件判断
+# && 代表 AND
+# || 代表 or
+
+[ "$yn" == "Y" -o "$yn" == "y" ];
+
+# 上式可替换为
+[ "$yn" == "Y" ] || [ "$yn" == "y" ];
+
+```
+
+
+
+```shell
+#!/bin/bash
+# filename: ans_yn2.sh
+# description: if...then 示例
+read -p "Please input (Y/N):" yn;
+
+if [ "$yn" == "Y" ] || [ "$yn" == "y" ]; then
+	echo "OK, continue";
+	exit 0;
+fi
+
+if [ "$yn" == "N" ] || [ "$yn" == "n" ]; then
+	echo "Oh, interrupt!";
+	exit 0;
+fi
+
+echo "I don't konw what your choice is " && exit;
+```
+
+
+
+### case...esac
+
+```shell
+case $变量名称 in
+"第一个变量内容")
+	程序段
+	;;
+"第二个变量内容")
+	程序段
+	;;
+*)
+# 不包含第一个变量内容与第二个变量内容的其他程序执行段
+	exit 1;
+	;;
+esac
+```
+
+
+
+```shell
+#!/bin/bash
+# filename: hello-3.sh
+case $1 in 
+"hello")
+	echo "Hello, how are you ?";
+	;;
+"")
+	echo "You MUST input parameters, ex> {$0 someword}";
+	;;
+*)
+	echo "Usage $0 {hello}";
+esac
+```
+
+
+
+### function
+
+```shell
+#!/bin/bash
+# filename: show123-3.sh
+function printit () {
+	echo "Your choice is $1";
+}
+
+echo "This programe will print your selection !";
+case $1 in 
+"one")
+	printit 1; # 请注意 printit 命令后面还有接参数
+	;;
+"two")
+	printit 2; 
+	;;
+"three")
+	printit 3;
+	;;
+*)
+	echo "Usage $0 {one|two|tree}";
+	;;
+esac
+
+```
+
+
+
+## 循环（loop）
+
+### while do done、until do done (不定循环)
+
+```shell
+while [ condition ] <== 中括号内的状态就是判断式
+do <== do 是循环的开始
+	程序段落;
+done <== done 是循环的结束
+```
+
+```shell
+# 当 condition 条件成立时，就终止循环，否则就程序进行循环的程序段
+util [ condition ]
+do
+	程序段落;
+done
+```
+
+```shell
+#!/bin/bash
+# filename: yes_to_stop.sh
+
+while [ "$yn" != "yes" -a "$yn" != "YES" ]
+do
+ 	read -p "Please input yes/YES to stip this program: " yn;
+done
+
+echo "OK! you input the correct answer.";
+```
+
+```shell
+#!/bin/bash
+# filename: yes_to_stop-2.sh
+
+until [ "$yn" == "yes" -o "$yn" == "YES" ]
+do
+ 	read -p "Please input yes/YES to stip this program: " yn;
+done
+
+echo "OK! you input the correct answer.";
+```
+
+
+
+### for...do...done (固定循环)
+
+```shell
+for var in con1 con2 con3 ...
+do
+	程序段
+done
+```
+
+```shell
+#!/bin/bash
+# filename: show_animal.sh
+for animal in dog cat elephant
+do
+	echo "There are ${animal}s...";
+done
+```
+
+
+
+## shell 脚本的默认变量（$0, $1...）
+
+- $#：代表后接的参数【个数】
+- $@：代表【"$1" "$2" "$3" "$4"】之意，每个变量是独立的（用双引号扩起来）
+- $*：代表【"$1c$2c$3c$4"】，其中 c 为分隔字符，默认为空格
+- $0: 脚本文件名
+- $n: n > 0, 表示第 n 个变量
+- $$: 当前 Shell 进程ID
+
+
+
+```shell
+#!/bin/bash
+# filename: how_paras.sh
+echo "The script name is  ==> $0";
+echo "Total parameter number is ==> $#";
+[ "$#" -lt 2 ] && echo "The number of parameter is less than 2. Stop here" && exit 0;
+echo "Your whole parameter is ==> '$@'";
+echo "The 1st parameter ==> $1";
+echo "The 2nd parameter ==> $2";
+```
+
+```shell
+sh how_paras.sh theone haha quot
+# The script name is  ==> how_paras.sh
+# Total parameter number is ==> 3
+# Your whole parameter is ==> 'theone haha quot'
+# The 1st parameter ==> theone
+# The 2nd parameter ==> haha
+```
+
+
+
+### shift: 造成参数变量号码偏移
+
+```shell
+#!/bin/bash
+# filename: shift_paras.sh
+echo "Total parameter number is ==> $#";
+echo "Your whole parameter is ==> '$@'";
+
+# 进行第一次【一个变量的 shift】
+shift;
+echo "Total parameter number is ==> $#";
+echo "Your whole parameter is ==> '$@'";
+
+# 进行第二次【3个变量的 shift】
+shift 3;
+echo "Total parameter number is ==> $#";
+echo "Your whole parameter is ==> '$@'";
+
+```
+
+
+
+## 脚本的执行方式差异（source、sh script、./script）
+
+- 通过sh script 及 ./script 方式执行脚本时，该脚本都会使用一个新的 bash 环境来执行脚本内的命令
+- 通过 source 方式执行脚本，脚本会在父进程中执行
+
+```shell
+#!/bin/bash
+# filename: showname.sh
+
+read -p "Please input your first name: " firstname;
+read -p "Please input your last name: " lastname;
+echo -e "\n Your full name is :${firstname} ${lastname}";
+```
+
+
+
+```shell
+# 在命令行中测试 sh 方式执行脚本
+echo ${firstname} ${lastname};
+# 没有数据输出
+
+sh showname.sh;
+# Please input your first name: chen
+# Please input your last name: liangfeng
+# Your full name is :chen liangfeng
+
+echo ${firstname} ${lastname};
+# 没有数据输出
+```
+
+
+
+```shell
+# 在命令行中测试 source 方式执行脚本
+echo ${firstname} ${lastname};
+# 没有数据输出
+
+source showname.sh;
+# Please input your first name: chen
+# Please input your last name: liangfeng
+# Your full name is :chen liangfeng
+
+echo ${firstname} ${lastname};
+# chen liangfeng
+```
+
+
+
+## shell 脚本的跟踪与调试
+
+```shell
+sh [-nvx] scripts.sh
+
+选项与参数：
+-n : 不要执行脚本，仅查询语法的问题
+-v : 在执行脚本前，先将脚本文件的内容输出到屏幕上
+-x : 将使用到的脚本内容显示到屏幕上
+```
+
+
+
+## 命令查看
+
+### 查看命令如何使用
+
+```shell
+man command
+command --help
+```
+
+
+
+### 查看命令是否是 bash 的内置命令
+
+```shell
+type command
+```
+
+
 
 ## 查找命令
 
-| 命令    | 适用场景                                         | 优缺点           |
-| ------- | ------------------------------------------------ | ---------------- |
-| find    | 查找某一类文件，比如文件名部分一致               | 功能强大，速度慢 |
-| locate  | 只能查找单个文件                                 | 功能单一，速度快 |
-| Whereis | 查找程序的可执行文件、帮助文档等                 | -                |
-| which   | 只查找程序的可执行文件，常用于查找程序的绝对路径 | -                |
+| 命令    | 适用场景                                                     | 优缺点           | 说明                                                         |
+| ------- | ------------------------------------------------------------ | ---------------- | ------------------------------------------------------------ |
+| find    | 1. 查找特定路径下的文件（配合glob mod）<br />2. 查找具有某些特征的文件，查找特定路径下（大小，修改时间等等） | 功能强大，速度慢 | 直接查找硬盘                                                 |
+| locate  | 命令形式`locate [-ir] keyword`<br />在忘记某个文件的完整文件名时，可以通过该命令去查找，得到完整的文件名 | 功能单一，速度快 | 利用数据库来查找文件名                                       |
+| whereis | 主要针对 /bin/sbin 下面的执行文件、/usr/share/man 下面的 man page 文件，以及几个比较特定的目录来处理；具体可通过 `whereis -l` 命令去查看 | 速度快           | 只找系统中某些特定目录下面的文件                             |
+| which   | 查找【执行文件】的绝对路径                                   | 速度快           | 根据【PATH】这个环境变量所规范的路径，去查找执行文件的文件名。 |
+
+### locate/updatedb
+
+locate 寻找的数据是由已建立的数据库 /var/lib.mlocate/ 里面的数据所查找到的。
+
+**限制：**
+
+数据库的建立默认是每天执行一次，所以新建立起来的文件，如果在数据库更新之前去查找会找不到。可通过 updatedb 命令手动更新。
 
 
 
-## 过滤器
+## 通配符与特殊符号
+
+| 符号 | 意义                                                         |
+| ---- | ------------------------------------------------------------ |
+| *    | 代表【0个到无穷多个】任意个字符                              |
+| ?    | 代表【一定有一个】任意字符                                   |
+| []   | 同样代表【一定有一个在括号内】的字符（非任意字符）。例如 [abcd] 代表【一定有一个字符，可能是a、b、c、d这四个任何一个】 |
+| [-]  | 若有减号在中括号内时，代表【在编码顺序内的所有字符】。例如【0-9】代表0-9之间的所有数字，因为数字的语系编码是连续的。 |
+| [^]  | 若中括号内的第一个字符为指数符号（^），那代表【反向选择】，例如 `[^abc]` 代表 一个定有一个符号，只要是非 a、b、c的其他字符就接受的意思 |
+
+
+
+## 数据流重定向
+
+- 标准输入（stdin）：代码为 0， 使用 < 或 <<
+- 标准输出（stdout）：代码为 1，使用 > 或 >>
+- 标准错误输出（stderr）：代码为 2，使用 2> 或 2>>
+
+
+
+- `1>`: 以覆盖的方法将［正确的数据］输出到指定的文件或设备上；
+
+- `1>>`：以累加的方法将［正确的数据］输出到指定的文件或设备上；
+
+- `2>`：以覆盖的方法将［错误的数据］输出到指定的文件或设备上；
+
+- `2>>`：以累加的方法将［错误的数据］输出到指定的文件或设备上；
+
+
+
+```shell
+# 将 stdout stderr 分别存到不同的文件中．
+find /home -name .bashrc > list_right 2> list_error;
+
+# 将错误的数据丢弃，屏幕上显示正确的数据．
+find /home -name .bashrc 2> /dev/null;
+
+# 将命令的数据全部写入名为 list 的文件中
+find /home -name .bashrc > list 2>&1;
+find /home -name .bashrc &> list;
+```
+
+
+
+**standard input: < 与 <<**
+
+```shell
+cat > catfile 
+testing 
+cat file test 
+# <== 这里按下［ ctrl]+d 来退出。
+
+cat catfile 
+# testing 
+# cat file test
+```
+
+
+
+```shell
+cat > catfile << "eof"
+> This is a test 
+> OK now stop
+> eof
+
+cat catfile 
+# This is a test 
+# OK now stop
+```
+
+
+
+## xargs
+
+产生某个命令的参数
+
+```shell
+cut -d ':' -f 1 /etc/passwd | head -n 3
+# root
+# bin
+# daemon
+
+id root
+# uid=0(root) gid=0(root) 组=0(root)
+
+# 注：id 不是管道命令
+cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs -n 1 id;
+# uid=0(root) gid=0(root) 组=0(root)
+# uid=1(bin) gid=1(bin) 组=1(bin)
+# uid=2(daemon) gid=2(daemon) 组=2(daemon)
+```
+
+
+
+## 减号【-】的用途
+
+在管道命令当中，常常会使用到前一个命令的 stdout 作为这次的 stdin，某些命令需要用到文件名（例如 tar）来进行处理时，该 stdin 与 stdout 可以利用减号 “-” 来代替，举例来说
+
+```shell
+mkdir /tmp/homeback;
+tar -cvf - /home | tar -xvf - -C /tmp/homeback;
+```
+
+上面这个例子是说：【我将 /home 里面的文件给它打包，但打包的数据不是记录到文件，而是传送到 stdout，经过管道后，将 tar -cvf - /home 传送给后面的 tar -xvf -】。后面的这个 - 则是使用前一个命令的 stdout，因此，我们就不需要使用文件名了。
+
+
+
+
+
+## 命令执行的判断依据
+
+| 命令执行情况   | 说明                                                         |
+| -------------- | ------------------------------------------------------------ |
+| cmd1 && cmd2   | 1. 若 cmd1 执行完毕且正确执行 ( $? 等于 0 )，则开始执行 cmd2 <br />2. 若 cmd1 执行完毕且为错误  ( $? 不等于 0 )， 则 cmd2 不执行 |
+| cmd1 \|\| cmd2 | 1. 若 cmd1 执行完毕且正确执行 ( $? 等于 0)， 则 cmd2 不执行<br />2. 若 cmd1 执行完毕且为错误  ( $? 不等于 0)，则开始执行 cmd2 |
+
+
+
+## 选取命令：cut、grep
+
+### cut
+
+在文件的每一行中提取片断；
+
+cut 主要的用途在于将同一行里面的数据进行分解，最常使用在分析一些数据或文字数据的时候。
+
+```shell
+echo $PATH
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+
+echo $PATH | cut -d ':' -f 2
+# /usr/local/bin
+
+echo $PATH | cut -d ':' -f 2,3
+# /usr/local/bin:/usr/sbin
+
+```
+
+
+
+```shell
+export
+# declare -x HISTCONTROL="ignoredups"
+# declare -x HISTSIZE="1000"
+# declare -x HOME="/root"
+
+# export | cut -c 12-20 则表示取第12-20个字符片段
+export | cut -c 12-
+# HISTCONTROL="ignoredups"
+# HISTSIZE="1000"
+# HOME="/root"
+
+```
+
+
 
 ### grep
+
+grep是分析一行信息，若当中有我们所需要的信息，就将该行拿出来。
 
 用法
 
@@ -25,15 +883,163 @@ grep [option] [pattern] [file1, file2, ...]
 command | grep [option] [pattern] 
 ```
 
-
-
 ### egrep
 
 egrep 相当于  `grep -E` 的简写
 
 
 
-## 流编辑器
+## 排序命令：sort、wc、uniq
+
+### sort
+
+```shell
+cat /etc/passwd | sort;
+
+# /etc/passwd 内容以 : 来分隔的，我想以第三栏来排序
+cat /etc/passwd | sort -t ':' -k 3;
+```
+
+
+
+### uniq
+
+删除排序文件中的重复行
+
+```shell
+# 使用 last 将账号列出，仅取出账号栏，进行排序后仅取出一位
+last | cut -d ' ' -f 1 | sort | uniq;
+
+# 承上 ，如果我还想要知道每个人的登陆次数
+last | cut -d ' ' -f 1 | sort | uniq -c;
+
+```
+
+
+
+### wc
+
+输出文件中的行数、单词数、字节数
+
+```shell
+# /etc/man_db.conf 里面到底有多少相关字、行、字符数
+cat /etc/man_db.conf | wc
+# 行			 字符		 字符数
+# 131     723    5171
+
+```
+
+
+
+## 双向重定向：tee
+
+从标准输入写往文件和标准输出
+
+```shell
+# 将 last 的输出存一份到 last.list 文件中；
+last | tee last.list | cut -d " " -f 1;
+```
+
+
+
+## 字符转换命令
+
+### tr
+
+tr 可以用来删除一段信息当中的文字，或是进行文字信息的替换。
+
+```shell
+# 将last 输出的信息中，所有的小写变成大写字符．
+last | tr '[a-z]' '[A-Z]';
+
+# 将／etc/passwd 输出的信息中，将冒号:删除
+cat /etc/passwd | tr -d ':'
+```
+
+
+
+### join
+
+在公共字段上连接两个文件的行 
+
+```shell
+head -n 3 /etc/passwd /etc/shadow
+# ==> /etc/passwd <==
+# root:x:0:0:root:/root:/bin/bash
+# bin:x:1:1:bin:/bin:/sbin/nologin
+# daemon:x:2:2:daemon:/sbin:/sbin/nologin
+
+# ==> /etc/shadow <==
+#root:$6$Edc14VxV$r98Vt6fIy8L9lT3t0VY7mQLRtAJd1ikCde3uwhUXLxExcm6Dv1jMVDbADQtMyDfTd18ellNkzIGBs346ZcasO0:18878:0:99999:7:::
+# bin:*:18353:0:99999:7:::
+# daemon:*:18353:0:99999:7:::
+
+# 由输出的数据可以发现这两个文件的最左边栏位都是相同账号，且以 : 分隔
+join -t ':' /etc/passwd /etc/shadow | head -n 3;
+
+# root:x:0:0:root:/root:/bin/bash:$6$Edc14VxV$r98Vt6fIy8L9lT3t0VY7mQLRtAJd1ikCde3uwhUXLxExcm6Dv1jMVDbADQtMyDfTd18ellNkzIGBs346ZcasO0:18878:0:99999:7:::
+# bin:x:1:1:bin:/bin:/sbin/nologin:*:18353:0:99999:7:::
+# daemon:x:2:2:daemon:/sbin:/sbin/nologin:*:18353:0:99999:7:::
+
+```
+
+### past
+
+合并文件各行
+
+```shell
+paste /etc/passwd /etc/shadow
+```
+
+### expand
+
+将 [tab] 按键转成空格键
+
+```shell
+grep '^MANPATH' /etc/man_db.conf | head -n 3
+# MANPATH_MAP     /bin                    /usr/share/man
+# MANPATH_MAP     /usr/bin                /usr/share/man
+# MANPATH_MAP     /sbin                   /usr/share/man
+
+grep '^MANPATH' /etc/man_db.conf | head -n 3 | cat -A
+# MANPATH_MAP^I/bin^I^I^I/usr/share/man$
+# MANPATH_MAP^I/usr/bin^I^I/usr/share/man$
+# MANPATH_MAP^I/sbin^I^I^I/usr/share/man$
+
+grep '^MANPATH' /etc/man_db.conf | head -n 3 | expand -t 6 | cat -A
+# MANPATH_MAP /bin              /usr/share/man$
+# MANPATH_MAP /usr/bin          /usr/share/man$
+# MANPATH_MAP /sbin             /usr/share/man$
+```
+
+
+
+### split
+
+将文件拆分成多个文件
+
+```shell
+cp /etc/passwd passwd;
+split -l 5 passwd passwd_split_
+ls | grep 'passwd*';
+# passwd
+# passwd_split_aa
+# passwd_split_ab
+# passwd_split_ac
+# passwd_split_ad
+# passwd_split_ae
+# passwd_split_af
+# passwd_split_ag
+# passwd_split_ah
+# passwd_split_ai
+
+# 将上面的文件合成一个文件
+cat passwd_split* >> passwd_bak;
+```
+
+
+
+## 流编辑器（Sed）
 
 Sed(Stream Editor) 流编辑器。对标准输出或文件逐行进行处理。
 
@@ -62,7 +1068,7 @@ sed -n '10,5+ p' /etc/passwd;
 # root 开头的行
  sed -n '/^root/ p' /etc/passwd;
  
-# 以 root 开头的行到以 yarn 开头的行
+# 以 root 开头的行到以 daemon 开头的行
 sed -n '/^root/,/^daemon/ p' /etc/passwd;
 
 # 从第 1 行到daemon开头的行
@@ -126,8 +1132,6 @@ standard output | awk 'BEGIN{} pattern {commands} END{}';
 
 
 
-
-
 ### 参数解释
 
 | 语法格式   | 解释                     |
@@ -145,7 +1149,7 @@ standard output | awk 'BEGIN{} pattern {commands} END{}';
 | --------------------------- | ----------------------------------------------- |
 | $0                          | 整行内容                                        |
 | $1-$n                       | 当前行的第1-n个字段                             |
-| NF[number field  ]          | 当前行的字段个数，也就是多少列                  |
+| NF[number field]            | 当前行的字段个数，也就是多少列                  |
 | NR[number row]              | 当前行的行号，从1开始计数                       |
 | FNR[file number row]        | 多文件处理时，每个文件行号单独技术，都是从1开始 |
 | FS[field separator]         | 输入字段分隔符。不指定默认以空格或tab键分割     |
@@ -249,7 +1253,7 @@ awk 'BEGIN{FS=":"} $7 != "/bin/bash" {print $0}' /etc/passwd;
 # 以 : 为分隔符，匹配 /etc/passwd 文件中第 3 个字段包含3个数字以上的行信息
 awk 'BEGIN{FS=":"} $3~/[0-9]{3,}/ {print $0}' /etc/passwd;
 
-# 以 : 为分隔符，匹配 /etc/passwd 文件中包含 hdfs 或 yarn 的所有行信息
+# 以 : 为分隔符，匹配 /etc/passwd 文件中包含 root 或 yarn 的所有行信息
 awk 'BEGIN{FS=":"} $1 == "root" || $1 == "yarn" {print $0}' /etc/passwd;
 
 # 以 : 为分隔符，匹配 /etc/passwd 文件中第 3 个字段小于 50 并且第 4 个字段大于50的所有行信息
@@ -258,7 +1262,7 @@ awk 'BEGIN{FS=":"} $3 < 50 && $4 > 50 {print $0}' /etc/passwd;
 
 
 
-### 动作表达式中的算术运算符
+### Awk动作表达式中的算术运算符
 
 | 运算符  | 含义                      |
 | ------- | ------------------------- |
@@ -353,6 +1357,8 @@ BEGIN{
 ```shell
 # 以 : 为分隔符，返回 /etc/passwd 中每行中每个字段的长度
 awk -f example_1.awk /etc/passwd;
+
+# example_1.awk 的内容
 BEGIN{
         FS=":"
 }
@@ -431,3 +1437,10 @@ END {
 }
 ```
 
+## 参考链接
+
+https://zh.wikipedia.org/wiki/%E6%AE%BC%E5%B1%A4
+
+《鸟哥的 Linux 私房菜》
+
+https://coding.imooc.com/class/314.html
