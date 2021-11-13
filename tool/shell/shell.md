@@ -1,4 +1,4 @@
-# Shell
+# 前端工程师的 Shell 修行  
 
 ## shell 与 shell 脚本
 
@@ -21,11 +21,11 @@
 - 通用：Linux 各种发行版的 shell 都相同
 - 远程管理：命令行模式就是比较快
 
+## shell 脚本
 
+### 变量
 
-## 变量
-
-### 类别
+#### 类别
 
 - 普通变量
   - 全局变量
@@ -34,7 +34,7 @@
 
 
 
-### 定义变量
+#### 定义变量
 
 - 变量与变量内容以一个等号【=】来连接（*等号的两边不能有空格*）
 
@@ -42,7 +42,7 @@
   myname=clf
   ```
 
-- 双引号的特殊字符如 $ 等，可以保有原本的特性
+- 双引号内的特殊字符如 $ 等，可以保有原本的特性
 
   ```shell
   var="lang is $LANG";
@@ -53,7 +53,7 @@
 - 单引号内的特殊字符则仅为一般字符（纯文本）
 
   ```shell
-  var="lang is $LANG";
+  var='lang is $LANG';
   
   echo $var; # lang is $LANG
   ```
@@ -98,7 +98,7 @@
   #!/bin/bash
   # 定义函数
   function func(){
-      local test=99; # 在函数函数内通过关键字 local 定义的局部变量只能在函数内访问
+      local test=99; # 在函数内通过关键字 local 定义的局部变量只能在函数内访问
       echo "inner test: $test";
       # 输出 inner test: 99
   }
@@ -118,24 +118,49 @@
   declare -x named="clfeng";  
   ```
 
+#### 声明变量的类型
 
-
-
-### 查看环境变量
+declare,typeset 关键字。这两个关键字的功能是一样，就是声明变量的类型
 
 ```shell
-env
+sum=100+300+50;
+echo $sum;
+# 输出 "100+300+50"
 
-# 或者
-# export
+declare -i sum=100+300+50;
+echo $sum;
+# 输出 450
 
-# 查看所有变量（含环境变量与自定义变量）
-# set
+# 将sum变成环境变量
+declare -xi sum=100+300+50;
+export | grep sum;
+
+# 进行取消操作
+declare +x sum;
+
+# 让 sum 变成只读，不可修改
+declare -r sum=10;
+sum=20; # 报错
+
 ```
 
 
 
-### 读取来自键盘输入的变量：
+
+#### 查看环境变量
+
+```shell
+env
+# 或者
+export
+
+# 查看所有变量（含环境变量与自定义变量）
+set
+```
+
+
+
+#### 读取来自键盘输入的变量
 read 关键字
 
 ```shell
@@ -158,38 +183,11 @@ echo ${named:-default};
 
 
 
-### 声明变量的类型：
-
-declare,typeset 关键字。这两个关键字的功能是一样，就是声明变量的类型
-
-```shell
-sum=100+300+50;
-echo $sum;
-# 输出 "100+300+50"
-
-declare -i sum=100+300+50;
-echo $sum;
-# 输出 450
-
-# 将sum变成环境变量
-declare -xi sum=100+300+50;
-export | grep sum;
-
-# 进行取消操作
-declare +x sum;
 
 
-# 让 sum 变成可读，不可修改
-declare -r sum=10;
-sum=20; # 报错
+#### 变量内容的删除、取代与替换
 
-```
-
-
-
-### 变量内容的删除、取代与替换
-
-#### 删除
+##### 删除
 
 #：从前往后，符合替换文字的 【最短的】那一个
 
@@ -235,7 +233,7 @@ echo ${PATH%%:*bin}
 
 
 
-#### 替换
+##### 替换
 
 ```shell
 echo $PATH
@@ -252,7 +250,7 @@ echo ${PATH//sbin/SBIN}
 
 
 
-#### 总结
+##### 总结
 
 | 变量设置方式               | 说明                                                         |
 | -------------------------- | ------------------------------------------------------------ |
@@ -262,10 +260,10 @@ echo ${PATH//sbin/SBIN}
 | ${变量%%关键字}            | 若变量内容从尾向前的数据符合【关键词】，则将符合的最长数据删除 |
 | ${变量/旧字符串/新字符串}  | 若变量内容符合【旧字符串】则【第一个旧字符串会被新字符串替换】 |
 | ${变量/旧字符串//新字符串} | 若变量内容符合【旧字符串】则【全部的旧字符串会被新字符串替换】 |
-|                            |                                                              |
-|                            |                                                              |
 
-### 变量的测试与内容替换
+
+
+#### 变量的测试与内容替换
 
 | 变量设置方式     | str 没有设置           | str 为空字符串         | str 已设置为非空字符串 |
 | ---------------- | ---------------------- | ---------------------- | ---------------------- |
@@ -308,19 +306,21 @@ echo ${username:-root}
 
 
 
-## 变量引用小结
+#### 变量引用小结
 
 从前面不难的示例中不难发现变量的引用有两种方式 $variable 和 ${variable}；在使用场景上，如果我们只是简单的引用一个变量那么就使用 $variable；如果还有进行一些操作，例如替换变量内容的话便使用 ${variable} 的形式吧。
 
 
 
-## 判断式
+### 判断式
 
-### test 命令的测试功能
+#### test 命令的测试功能
 
 **参数列表**
 
 ![test](./test.png)
+
+**注：-eq -ne -gt -lt -le 等测试参数主要用于数字比较，如果是字符串的比较情况 == 与 !=**
 
 
 
@@ -349,7 +349,7 @@ echo "And the permissions for you are: $perm";
 
 
 
-### 判断符号 []
+#### 判断符号 []
 
 中括号的使用方法与test几乎一模一样，只是中括号比较常用在条件判断式 if...then..fi 的情况中。
 
@@ -366,9 +366,9 @@ HOME="/home/clf";
 
 
 
-## 条件判断
+### 条件判断
 
-### if...then
+#### if...then
 
 ```shell
 if [ 条件判断式 ]; then
@@ -429,7 +429,7 @@ echo "I don't konw what your choice is " && exit;
 
 
 
-### case...esac
+#### case...esac
 
 ```shell
 case $变量名称 in
@@ -465,7 +465,7 @@ esac
 
 
 
-### function
+### 函数 (function)
 
 ```shell
 #!/bin/bash
@@ -494,15 +494,15 @@ esac
 
 
 
-## 循环（loop）
+### 循环（loop）
 
-### while do done、until do done (不定循环)
+#### while do done、until do done (不定循环)
 
 ```shell
-while [ condition ] <== 中括号内的状态就是判断式
-do <== do 是循环的开始
+while [ condition ] # <== 中括号内的状态就是判断式
+do # <== do 是循环的开始
 	程序段落;
-done <== done 是循环的结束
+done # <== done 是循环的结束
 ```
 
 ```shell
@@ -539,7 +539,7 @@ echo "OK! you input the correct answer.";
 
 
 
-### for...do...done (固定循环)
+#### for...do...done (固定循环)
 
 ```shell
 for var in con1 con2 con3 ...
@@ -559,7 +559,7 @@ done
 
 
 
-## shell 脚本的默认变量（$0, $1...）
+### shell 脚本的默认变量（$0, $1...）
 
 - $#：代表后接的参数【个数】
 - $@：代表【"$1" "$2" "$3" "$4"】之意，每个变量是独立的（用双引号扩起来）
@@ -612,9 +612,20 @@ echo "Your whole parameter is ==> '$@'";
 
 ```
 
+```shell
+bash shift_paras.sh one two tree four five six seven eight nine ten
+# Total parameter number is ==> 10
+# Your whole parameter is ==> 'one two tree four five six seven eight nine ten'
+# Total parameter number is ==> 9
+# Your whole parameter is ==> 'two tree four five six seven eight nine ten'
+# Total parameter number is ==> 6
+# Your whole parameter is ==> 'five six seven eight nine ten'
+
+```
 
 
-## 脚本的执行方式差异（source、sh script、./script）
+
+### 脚本的执行方式差异（source、sh script、./script）
 
 - 通过sh script 及 ./script 方式执行脚本时，该脚本都会使用一个新的 bash 环境来执行脚本内的命令
 - 通过 source 方式执行脚本，脚本会在父进程中执行
@@ -662,7 +673,7 @@ echo ${firstname} ${lastname};
 
 
 
-## shell 脚本的跟踪与调试
+### shell 脚本的跟踪与调试
 
 ```shell
 sh [-nvx] scripts.sh
@@ -675,9 +686,11 @@ sh [-nvx] scripts.sh
 
 
 
-## 命令查看
+## 命令
 
-### 查看命令如何使用
+### 命令查看
+
+#### 查看命令如何使用
 
 ```shell
 man command
@@ -686,7 +699,7 @@ command --help
 
 
 
-### 查看命令是否是 bash 的内置命令
+#### 查看命令是否是 bash 的内置命令
 
 ```shell
 type command
@@ -694,7 +707,7 @@ type command
 
 
 
-## 查找命令
+### 查找命令
 
 | 命令    | 适用场景                                                     | 优缺点           | 说明                                                         |
 | ------- | ------------------------------------------------------------ | ---------------- | ------------------------------------------------------------ |
@@ -703,7 +716,7 @@ type command
 | whereis | 主要针对 /bin/sbin 下面的执行文件、/usr/share/man 下面的 man page 文件，以及几个比较特定的目录来处理；具体可通过 `whereis -l` 命令去查看 | 速度快           | 只找系统中某些特定目录下面的文件                             |
 | which   | 查找【执行文件】的绝对路径                                   | 速度快           | 根据【PATH】这个环境变量所规范的路径，去查找执行文件的文件名。 |
 
-### locate/updatedb
+#### locate/updatedb
 
 locate 寻找的数据是由已建立的数据库 /var/lib.mlocate/ 里面的数据所查找到的。
 
@@ -713,7 +726,7 @@ locate 寻找的数据是由已建立的数据库 /var/lib.mlocate/ 里面的数
 
 
 
-## 通配符与特殊符号
+### 通配符与特殊符号
 
 | 符号 | 意义                                                         |
 | ---- | ------------------------------------------------------------ |
@@ -725,7 +738,7 @@ locate 寻找的数据是由已建立的数据库 /var/lib.mlocate/ 里面的数
 
 
 
-## 数据流重定向
+### 数据流重定向
 
 - 标准输入（stdin）：代码为 0， 使用 < 或 <<
 - 标准输出（stdout）：代码为 1，使用 > 或 >>
@@ -785,7 +798,7 @@ cat catfile
 
 
 
-## xargs
+### xargs
 
 产生某个命令的参数
 
@@ -807,7 +820,7 @@ cut -d ':' -f 1 /etc/passwd | head -n 3 | xargs -n 1 id;
 
 
 
-## 减号【-】的用途
+### 减号【-】的用途
 
 在管道命令当中，常常会使用到前一个命令的 stdout 作为这次的 stdin，某些命令需要用到文件名（例如 tar）来进行处理时，该 stdin 与 stdout 可以利用减号 “-” 来代替，举例来说
 
@@ -820,9 +833,7 @@ tar -cvf - /home | tar -xvf - -C /tmp/homeback;
 
 
 
-
-
-## 命令执行的判断依据
+### 命令执行的判断依据
 
 | 命令执行情况   | 说明                                                         |
 | -------------- | ------------------------------------------------------------ |
@@ -831,9 +842,9 @@ tar -cvf - /home | tar -xvf - -C /tmp/homeback;
 
 
 
-## 选取命令：cut、grep
+### 选取命令：cut、grep
 
-### cut
+#### cut
 
 在文件的每一行中提取片断；
 
@@ -869,7 +880,7 @@ export | cut -c 12-
 
 
 
-### grep
+#### grep
 
 grep是分析一行信息，若当中有我们所需要的信息，就将该行拿出来。
 
@@ -883,15 +894,15 @@ grep [option] [pattern] [file1, file2, ...]
 command | grep [option] [pattern] 
 ```
 
-### egrep
+#### egrep
 
 egrep 相当于  `grep -E` 的简写
 
 
 
-## 排序命令：sort、wc、uniq
+### 排序命令：sort、wc、uniq
 
-### sort
+#### sort
 
 ```shell
 cat /etc/passwd | sort;
@@ -902,7 +913,7 @@ cat /etc/passwd | sort -t ':' -k 3;
 
 
 
-### uniq
+#### uniq
 
 删除排序文件中的重复行
 
@@ -917,7 +928,7 @@ last | cut -d ' ' -f 1 | sort | uniq -c;
 
 
 
-### wc
+#### wc
 
 输出文件中的行数、单词数、字节数
 
@@ -931,7 +942,7 @@ cat /etc/man_db.conf | wc
 
 
 
-## 双向重定向：tee
+### 双向重定向：tee
 
 从标准输入写往文件和标准输出
 
@@ -942,9 +953,9 @@ last | tee last.list | cut -d " " -f 1;
 
 
 
-## 字符转换命令
+### 字符转换命令：tr、join、past、expand、split
 
-### tr
+#### tr
 
 tr 可以用来删除一段信息当中的文字，或是进行文字信息的替换。
 
@@ -958,7 +969,7 @@ cat /etc/passwd | tr -d ':'
 
 
 
-### join
+#### join
 
 在公共字段上连接两个文件的行 
 
@@ -983,7 +994,7 @@ join -t ':' /etc/passwd /etc/shadow | head -n 3;
 
 ```
 
-### past
+#### past
 
 合并文件各行
 
@@ -991,7 +1002,7 @@ join -t ':' /etc/passwd /etc/shadow | head -n 3;
 paste /etc/passwd /etc/shadow
 ```
 
-### expand
+#### expand
 
 将 [tab] 按键转成空格键
 
@@ -1014,7 +1025,7 @@ grep '^MANPATH' /etc/man_db.conf | head -n 3 | expand -t 6 | cat -A
 
 
 
-### split
+#### split
 
 将文件拆分成多个文件
 
@@ -1039,11 +1050,11 @@ cat passwd_split* >> passwd_bak;
 
 
 
-## 流编辑器（Sed）
+### 流编辑器（Sed）
 
 Sed(Stream Editor) 流编辑器。对标准输出或文件逐行进行处理。
 
-### 语法格式
+#### 语法格式
 
 ```shell
 # 形式一：
@@ -1053,7 +1064,7 @@ sed [option] "pattern command" file
 
 
 
-### pattern 用法表
+#### pattern 用法表
 
 ```shell
 # 匹配第10行
@@ -1081,7 +1092,7 @@ sed -n '/^daemon/,10 p' /etc/passwd;
 
 
 
-### 编辑命令
+#### 编辑命令
 
 | 类别 | 编辑命令     | 含义                                                    |
 | ---- | ------------ | ------------------------------------------------------- |
@@ -1102,11 +1113,22 @@ sed -n '/^daemon/,10 p' /etc/passwd;
 #### 反向引用
 
 ```shell
+# str.txt 文件的内容如下：
+hadApp is a bigdata frame
+Spark hadBBp Kafaka
+Skill on hadCCp
+Paper Of hadDDp
+Google hadEEp
+```
+
+
+
+```shell
 # 将文件中的类型为 hadAAp、hadBBp 等替换为hadAAps、hadBBps
-sed -i 's/had..p/&1s/g' str.txt
+sed -i 's/had..p/&s/g' str.txt;
 
 # 同上，语法形式不同而已
-sed -i 's/\(had..p\)/&1s/g' str.txt
+sed -i 's/\(had..p\)/\1s/g' str.txt;
 
 # 将 hadAAp、hadBBp 替换为 hadoop
 sed -i 's/\(had\)..p/&1oop/g' str.txt
@@ -1114,13 +1136,13 @@ sed -i 's/\(had\)..p/&1oop/g' str.txt
 
 
 
-## awk
+### awk
 
 awk 是一个文本处理工具，通常用于处理数据并生成结果报告。
 
 
 
-### 语法格式
+#### 语法格式
 
 ```shell
 # 形式一：输入为文件
@@ -1132,7 +1154,7 @@ standard output | awk 'BEGIN{} pattern {commands} END{}';
 
 
 
-### 参数解释
+#### 参数解释
 
 | 语法格式   | 解释                     |
 | ---------- | ------------------------ |
@@ -1143,7 +1165,7 @@ standard output | awk 'BEGIN{} pattern {commands} END{}';
 
 
 
-### awk 的内置变量
+#### awk 的内置变量
 
 | 内置变量                    | 含义                                            |
 | --------------------------- | ----------------------------------------------- |
@@ -1162,7 +1184,7 @@ standard output | awk 'BEGIN{} pattern {commands} END{}';
 
 
 
-### printf的格式说明
+#### printf的格式说明
 
 | 格式符 | 含义                     |
 | ------ | ------------------------ |
@@ -1186,7 +1208,7 @@ standard output | awk 'BEGIN{} pattern {commands} END{}';
 
 ```shell
 # 以字符串格式打印 /etc/passwd 中的第 7 个字段，以 “:” 作为分隔符
-awk 'BEGIN{FS=":"} {printf "%s\n",$7}' /etc/passwd;
+awk 'BEGIN{FS=":"} {printf "%s\n", $7}' /etc/passwd;
 
 # 以 10 进制格式打印 /etc/passwd 中的第 3 个字段，以 ”:“ 作为分隔符
 awk 'BEGIN{FS=":"} {printf "%d\n", $3}' /etc/passwd;
@@ -1221,7 +1243,7 @@ awk 'BEGIN{FS=":"} {printf "%-20s %-20s\n", $1, $7}' /etc/passwd;
 
 
 
-### 模式匹配的两种方式
+#### 模式匹配的两种方式
 
 - 第一种模式匹配：RegExp
 - 第二种模式匹配：关系运算匹配
@@ -1262,7 +1284,7 @@ awk 'BEGIN{FS=":"} $3 < 50 && $4 > 50 {print $0}' /etc/passwd;
 
 
 
-### Awk动作表达式中的算术运算符
+#### awk动作表达式中的算术运算符
 
 | 运算符  | 含义                      |
 | ------- | ------------------------- |
@@ -1283,7 +1305,7 @@ awk 'BEGIN{num1=20;num2=30;print num1 - num2}';
 awk '/^$/ {sum++} END{print sum}' /etc/services
 
 
-# 计算学生课程分数平均值，学生课程文件内容如下：
+# 计算学生课程分数平均值，学生课程文件内容如下（保存到文件 student.txt 中）：
 # Allen 80 90 96 98
 # Mike  93 98 92 91
 # zhang 78 76 87 92
@@ -1296,7 +1318,7 @@ awk '/^$/ {sum++} END{print sum}' /etc/services
 
 awk 'BEGIN{printf "%-10s %-10s %-10s %-10s %-10s %s\n", "Name", "Language", "Math", "English", "Physics", "Average" } {total=$2 + $3 + $4 + $5; average=total / 4;printf "%-10s %-10d %-10d %-10d %-10d %0.2f\n", $1, $2, $3, $4, $5, average}' student.txt;
 
-# 计算 1+2+3+4+...+100的和，请使用 while、do while、for 三种循环方式实现
+# 计算 1+2+3+4+...+100 的和，请使用 while、do while、for 三种循环方式实现
 # while
 awk -f while.awk;
 
@@ -1338,7 +1360,7 @@ BEGIN{
 
 
 
-### 字符串函数对照表
+#### 字符串函数对照表
 
 | 函数名                | 解释                                                   | 函数返回值                |
 | --------------------- | ------------------------------------------------------ | ------------------------- |
@@ -1403,7 +1425,7 @@ awk 'BEGIN{str="Tranction 243 Start, Event ID:9002"; sub(/[0-9]+/, "$", str); pr
 
 ```
 
-###  选项
+####  选项
 
 | 选项 | 解释          |
 | ---- | ------------- |
@@ -1436,6 +1458,232 @@ END {
         printf "%-10s%-10d%-10d%-10d%-10d\n", "", language_sum, math_sum, english_sum, physics_sum, $5
 }
 ```
+
+
+
+## 文件的属性与权限管理
+
+Linux 一般将文件可读写的身份分为三个类别，分别是拥有者（owner）、所属群组（group）、其他人（others），且三种身份各有读（read）、写（write）、执行（execute）等权限。
+
+### 角色分类
+
+- 拥有者：当一个用户创建一个文件，该用户便是文件的拥有者。文件是用户的私有的，其他人没有查看修改的权限。
+
+- 用户组：若一个文件除了拥有者自己外的部分人拥有查看修改的权限，则可将这部分人划入到一个用户组中去，并对该用户组开发文件的权限，这样除了拥有者之外，用户组也拥有了文件的查看修改权限。
+- 其他人：既不是文件的拥有者也不属于对文件具有权限的用户者的人，则为其他人。
+
+### 文件属性与权限
+
+```shell
+# 使用 ls -al 查看目录下的文件内容
+dr-xr-x---.  4    root    root   281   		11月  8 22:33    .
+dr-xr-xr-x.  17   root    root   224   		2月  17 2021 		..
+-rw-r--r--.  1    root    root   0   			7月  10 22:39    10000
+-rw-------.  1    root    root   1430   	2月  17 2021     anaconda-ks.cfg
+-rw-r--r--.  1 		root 		root   0 				9月  20 21:33 		student.awk
+[    1   ]  [2]   [3]    [ 4 ]   [5]  		[  6    ]  			 [   7     ]
+[文件类型权限][链接] [拥有者][用户组] [文件容量]  [修改日期]			[   文件名   ]
+
+```
+
+使用`ls -al` 命令查看当前目录下文件的相关属性时第一栏为文件的类型及权限的说明；
+
+我门以 student.awk 文件的类型权限 `-rw-r--r--` 为例进行说明：
+
+该列共有十个字符，第1个字符表明文件的类型。后续则以3个字符为一组，分别代表用户、用户组、其他人的读、写、可执行权限。
+
+#### 文件类型：
+
+第一个字符表示的是文件的类型，其可能的值与含义：
+
+- `[d]`: 目录
+
+- `[-]`: 文件
+- `[l]`: 链接文件
+- `[b]`: 设备文件里面的可供存储的周边设备（可按块随机读写的设备）
+- `[c]`: 设备文件里面的串行端口设备，例如键盘、鼠标（一次性读取设备）
+
+#### 权限：
+
+角色的权限由三个字符进行描述，依次为：
+
+1. 读（r）
+2. 写（w）
+3. 可执行（x）
+
+如果没有权限则用 `-` 表示，且需注意的是描述读、写、可执行的权限的位置是固定不变的；
+
+前面示例中 student.awk  的类型权限描述为 `-rw-r--r--`，解释起来便是：student.awk 为一个普通文件，其拥有者具有读写的权限，用户组拥有读的权限，其他人也具有读的权限。
+
+### 修改文件的属性与权限
+
+- chgrp:   修改文件所属用户组
+- chown：修改文件拥有者
+- chmod：修改文件的权限，SUID、SGID、SBIT 等的特性
+
+
+
+#### 修改用户组
+
+```shell
+# 修改用户组示例
+# 创建一个名为 mytest 的文件
+touch mytest;
+
+# 初始时的相关权限信息
+ls -al | grep 'mytest';
+# -rw-r--r--. 1 root root    0 11月 10 21:46 mytest
+
+# 添加一个名为 clfTest 的用户组
+groupadd clfTest;
+
+# 添加后可查看 /etc/group 可看到有上面添加的用户组
+# 将 mytest 的用户组改为 clfTest
+# 也可修改为其他的用户组，但是用户组必须是存在 /etc/group 中的
+chgrp clfTest mytest;
+
+# 查看 mytest 的权限
+ls -al | grep mytest;
+# -rw-r--r--. 1 root clfTest    0 11月 10 21:46 mytest
+
+```
+
+
+
+#### 修改拥有者
+
+```shell
+# 修改文件拥有者示例
+# 依旧使用前面创建的 mytest 文件
+# 创建用户 clfeng
+adduser clfeng;
+
+# 设置用户 clfeng 的密码
+passwd clfeng;
+
+# 将 mytest 文件的拥有者改为 clfeng
+chown clfeng mytest;
+
+# 查看文件相关属性
+ls -al | grep mytest;
+# rw-r--r--. 1 clfeng clfTest    0 11月 10 21:46 mytest
+```
+
+
+
+#### 修改权限
+
+文件权限的设置方式有两种，分别可以使用数字或是符号来进行权限的修改。
+
+权限的数字对照表
+
+```shell
+r: 4
+w: 2
+x: 1
+```
+
+每种身份（owner、group、others）都拥有读、写、可执行三种权限，每种身份的权限数字是各自三个权限（r、w、x）的累加，例如当权限为：[-rwxrwx---] ，数字则是
+
+```shell
+owner= rwx = 4+2+1 = 7
+group= rwx = 4+2+1 = 7
+others = --- = 0+0+0 = 0
+```
+
+```shell
+chmod [-R] xyz 文件或目录
+选项与参数
+xyz：就是刚刚提到的数字类型的权限属性，为rwx属性值的相加
+-R：进行递归（recursive）修改，亦即连同子目录下的所有文件都会修改
+```
+
+
+
+##### 使用数字进行权限修改
+
+```shell
+# 修改文件权限示例
+# 查看文件相关属性
+ls -al | grep mytest;
+# rw-r--r--. 1 clfeng clfTest    0 11月 10 21:46 mytest
+
+# 将权限变成[-rwxr-xr--]
+chmod 754 mytest;
+
+# 查看权限
+ls -al | grep mytest;
+# -rwxr-xr--. 1 clfeng clfTest    0 11月 10 21:46 mytest
+
+```
+
+
+
+##### 符号类型修改文件权限
+
+![mod](./chmod.png)
+
+```shell
+# 移除文件所有权限
+chmod 000 mytest;
+
+# 查看一下权限
+ls -al | grep mytest
+# ----------. 1 clfeng clfTest    0 11月 10 21:46 mytest
+
+# 设置文件拥有者权限为读写可执行，设置用户组的权限为读可执行
+chmod u=rwx,g=rx mytest;
+ls -al | grep mytest;
+# -rwxr-x---. 1 clfeng clfTest    0 11月 10 21:46 mytest
+
+# 移除可执行权限
+chmod a-x mytest；
+
+# 查看下权限，可看到 chmod a-x mytest；命令将所有角色的可执行权限都移除了
+ls -al | grep mytest;
+#-rw-r-----. 1 clfeng clfTest    0 11月 10 21:46 mytest
+
+# 添加可执行权限
+chmod a+x mytest;
+ls -al | grep mytest
+# -rwxr-x--x. 1 clfeng clfTest    0 11月 10 21:46 mytest
+
+```
+
+### 目录与文件的权限意义
+
+#### 权限对文件的重要性
+
+文件是实际含有数据的地方 ，包括一般文本文件、数据库文件、二进制可执行文件（ binary program ）等 因此，权限对于文件来说，它的意义是这样的：
+
+- r（read）: 可读取此文件的实际内容，如读取文本文件的文字内容等；
+- w（write）：可以编辑、新增或是修改该文件的内容（但不含删除该文件）；
+- x （eXcute）：该文件具有可以被系统执行的权限
+
+当你对一个文件具有w权限时，你可以具有写入、编辑、新增、修改文件内容的权限，但并不具备有删除该文件本身的权限。对于文件的 rwx 来说，主要都是针对文件的内容而言，与文件名的存在与否没有关系，因为文件记录的是实际的数据。
+
+
+
+#### 权限对目录的重要性
+
+文件是存放实际数据的所在，那么目录主要是存储什么？目录主要的内容在记录文件名列表，文件名与目录有强烈的关联，所以如果是针对目录时，那个r、w、x对目录是什么意义呢？
+
+- r （read contents in directory）：表示具有读区目录结构列表的权限，所以当你具有读取（r）一个目录的权限时，表示你可以查询该目录下的文件名数据，所以你就可以利用 ls 这个命令将该目录的内容列表显示出来
+
+-  w（modify contents of directory）：这个可写入的权限对目录来说，是很了不起的，因为它表示你具有改动该目录结构列表的权限，也就是下面这些权限：
+
+  - 建立新的文件与目录
+  - 删除已经存在的文件与目录（不论该文件的权限时什么）
+  - 将已存在的文件或目录进行更名
+  - 移动该目录内的文件、目录位置
+
+  总之，目录的 w 权限就与该目录下面的文件名的变动有关。
+
+- x （access directory）：目录的 x 代表的是用户能否进入该目录成为工作目录的用途，所谓的工作目录（work directory）就是目前所在的目录。
+
+
+
+
 
 ## 参考链接
 
