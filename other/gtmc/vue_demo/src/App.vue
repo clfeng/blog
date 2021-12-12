@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <span @click="onShowBtn">showBtn</span>
-    <button @click="onClick" v-if="showBtn">button</button>
+    <button @click="this.onClick" v-if="showBtn">button</button>
   </div>
 </template>
 
