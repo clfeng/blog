@@ -12,7 +12,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.16.11",
     "@vitejs/plugin-legacy": "^1.7.1",
-    "vite": "^2.8.6",
+    "vite": "^2.9.13",
     "vite-babel-plugin": "^0.0.2"
   },
   "dependencies": {
